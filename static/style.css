@@ -1,0 +1,160 @@
+
+/* =========================================================
+   GLOBAL THEME
+========================================================= */
+
+html, body, [class*="st-"] {
+  font-family: 'Gelasio-Bold', serif !important;
+  background-color: #0A0D14 !important;
+  color: #ffffff !important;
+}
+
+.stApp {
+  background-color: #0A0D14 !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   WELCOME TEXT (BOLD + BIG ONLY)
+========================================================= */
+
+[data-testid="stMarkdownContainer"] h1,
+h1 {
+  font-size: 3rem !important;
+  font-weight: 800 !important;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+[data-testid="stSidebar"] {
+  background-color: #111520 !important;
+}
+
+/* =========================================================
+   FORM (SINGLE COLOR CARD)
+========================================================= */
+
+[data-testid="stForm"] {
+  background-color: #0D1220 !important;
+  padding: 2.5rem !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+/* remove internal conflicts */
+[data-testid="stForm"] * {
+  background: transparent !important;
+}
+
+/* form labels */
+[data-testid="stForm"] label {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* =========================================================
+   INPUT BOX (DIFFERENT COLOR)
+========================================================= */
+
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input,
+textarea {
+  background-color: #1B2233 !important;
+  color: #ffffff !important;
+  /* border: 1px solid rgba(255,255,255,0.12) !important; */
+  padding: 12px !important;
+}
+
+/* placeholder */
+[data-testid="stTextInput"] input::placeholder {
+  color: rgba(255,255,255,0.45) !important;
+}
+
+/* focus */
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus,
+textarea:focus {
+  /* border-color: #4C8BF5 !important; */
+  box-shadow: 0 0 10px rgba(76,139,245,0.25) !important;
+  outline: none !important;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+button,
+.stButton button,
+.stDownloadButton button {
+  background-color: #1B2233 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 0px !important;
+}
+
+/* =========================================================
+   METRICS (FLAT - NO HOVER)
+========================================================= */
+
+[data-testid="stMetric"] {
+  background-color: #181D2A !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 1rem !important;
+  border-radius: 0px !important;
+  transition: none !important;
+}
+
+[data-testid="stMetric"]:hover {
+  background-color: #181D2A !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* metric text */
+[data-testid="stMetricValue"] {
+  color: #ffffff !important;
+  font-size: 1.5rem !important;
+  font-weight: 400 !important;
+}
+
+[data-testid="stMetricLabel"] {
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 14px !important;
+}
+
+/* =========================================================
+   TEXT GLOBAL
+========================================================= */
+
+p, span, label, li {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   SELECTBOX (BASEWEB)
+========================================================= */
+
+[data-baseweb="select"] * {
+  color: #ffffff !important;
+}
+
+[data-baseweb="menu"] * {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   DATAFRAME
+========================================================= */
+
+.stDataFrame,
+.stDataFrame div {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   END
+========================================================= */
