@@ -28,14 +28,14 @@ def initial_session_defaults():
         "torso_angle":0,
 
         #status fields
-        "depth_status":"N\A",
-        "body_alignment":"N\A",
-        "hip_status":"N\A",
-        "shoulder_status":"N\A",
-        "swing_status":"N\A",
-        "extension_status":"N\A",
-        "back_arch_status":"N\A",
-        "balance_status":"N\A",
+        "depth_status":"N/A",
+        "body_alignment":"N/A",
+        "hip_status":"N/A",
+        "shoulder_status":"N/A",
+        "swing_status":"N/A",
+        "extension_status":"N/A",
+        "back_arch_status":"N/A",
+        "balance_status":"N/A",
 
         
     }

@@ -55,7 +55,7 @@ class LungesDetector(BaseExercise):
 
 
         key_landmarks_visible=(landmarks[front_hip_idx].visibility > self.MIN_VISIBILITY
-        and landmarks[front_knee_idx].visibility > self.MIN_VISIBILITY  and landmarks[front_ankle_idx].visibility > self.MIN_VISIBILITY)
+        and landmarks[front_knee_idx].visibility > self.MIN_VISIBILITY  and landmarks[front_ankle_idx].visibility > self.MIN_VISIBILITY )
 
         if key_landmarks_visible:
             if front_knee_angle < self.DOWN_THRESHOLD:

@@ -14,7 +14,6 @@ class PushUpDetector(BaseExercise):
     RIGHT_WRIST=16
     LEFT_HIP=23
     RIGHT_WRIST=16
-    LEFT_HIP=23
     RIGHT_HIP=24
     LEFT_ANKLE=27
     RIGHT_ANKLE=28
@@ -32,7 +31,7 @@ class PushUpDetector(BaseExercise):
         right_vis=landmarks[self.RIGHT_ELBOW].visibility
 
         if left_vis>=right_vis:
-            should_idx=self.LEFT_SHOULDER
+            shoulder_idx=self.LEFT_SHOULDER
             elbow_idx=self.LEFT_ELBOW
             wrist_idx=self.LEFT_WRIST
             hip_idx=self.LEFT_HIP
@@ -74,9 +73,9 @@ class PushUpDetector(BaseExercise):
             if elbow_angle< self.DOWN_THRESHOLD:
                 self.stage="down"
 
-                if elbow_angle >self.UP_THRESHOLD and self.stage=="down":
-                    self.stage="up"
-                    self.reps+=1
+            if elbow_angle >self.UP_THRESHOLD and self.stage=="down":
+                self.stage="up"
+                self.reps+=1
 
 
 

@@ -24,7 +24,7 @@ class BicepsCurlDetector(BaseExercise):
     
     def reset(self)->None:
         self.reps=0
-        self.stages=None
+        self.stage=None
         self._shoulder_x_baseline=None
 
     def process(self,landmarks)->dict:
@@ -50,7 +50,8 @@ class BicepsCurlDetector(BaseExercise):
         )
 
 
-        key_landmarks_visible= (landmarks[shoulder_idx].visibility>self.MIN_VISIBILITY)
+        key_landmarks_visible=  (landmarks[shoulder_idx].visibility>self.MIN_VISIBILITY 
+                        and landmarks[elbow_idx].visibility>self.MIN_VISIBILITY)
         
         if key_landmarks_visible:
             if elbow_angle< self.UP_THRESHOLD:
@@ -61,7 +62,7 @@ class BicepsCurlDetector(BaseExercise):
                 self.reps+=1
 
             shoulder_x=landmarks[shoulder_idx].x
-            elbow_x=landmarks[elbow_x].x
+            elbow_x=landmarks[elbow_idx].x
             elbow_drift=abs(elbow_x-shoulder_x)
 
             if elbow_drift <= self.ELBOW_DRIFT_TOLERANCE:

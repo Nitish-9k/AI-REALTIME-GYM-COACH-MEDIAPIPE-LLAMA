@@ -43,7 +43,7 @@ METRICS_FIELDS={
     
         "elbow_angle": 0,
         "extension_status":"N/A",
-        "back_srch_status":"N/A",
+        "back_arch_status":"N/A",
 
         },
 
