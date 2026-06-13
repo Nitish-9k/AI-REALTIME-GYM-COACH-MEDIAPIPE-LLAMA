@@ -89,12 +89,12 @@ class BicepsCurlDetector(BaseExercise):
             else:
                 swing_status="SWINGING"
 
-            return{
-                "reps":self.reps,
-                "elbow_angle":int(elbow_angle),
-                "shoulder_status": shoulder_status,
-                "swing_status":swing_status,
-            }
+        return{
+            "reps":self.reps,
+            "elbow_angle":int(elbow_angle),
+            "shoulder_status": shoulder_status,
+            "swing_status":swing_status,
+        }
 
 
     def _safe_angle(self,dx,dy):

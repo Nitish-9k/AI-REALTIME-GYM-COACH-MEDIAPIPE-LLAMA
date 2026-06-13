@@ -4,9 +4,11 @@ import streamlit as st
 
 
 class voice_pipeline():
-    def __init__(self,llm,tts):
+    def __init__(self,llm,tts,username):
         self.llm=llm
         self.tts=tts
+        self.username=username
+     
         self.last_spoken_at=0
     
     def _find_form_issue(self,exercise,metrics):
@@ -65,8 +67,9 @@ class voice_pipeline():
         return None   
 
 
-    def process_event(self,event,exercise,metrics):
+    def process_event(self,event,exercise,metrics,username=None):
         issue=self._find_form_issue(exercise,metrics)
+        print("username_recieved",repr(username))
 
         now=time.time()
 
@@ -82,7 +85,7 @@ class voice_pipeline():
             
 
 
-        text=self.llm.give_feedback(event,issue)
+        text=self.llm.give_feedback(event,issue,username)
         voice=self.tts.speech(text)
 
         self.last_spoken_at=now

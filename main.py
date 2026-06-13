@@ -48,7 +48,7 @@ def main():
                 llm_coach = LLMCOACH(groq_client)
                 tts = TextToSpeech()
 
-                st.session_state.voice_pipeline = voice_pipeline(llm_coach, tts)
+                st.session_state.voice_pipeline = voice_pipeline(llm_coach, tts,st.session_state.get("username"))
 
             except Exception as e:
                 st.error(f"Voice pipeline init failed: {e}")
@@ -90,7 +90,8 @@ def main():
                     result=st.session_state.voice_pipeline.process_event(
                         event="workout_started",
                         exercise=plan_exercise,
-                        metrics={}
+                        metrics={},
+                        username=st.session_state.get("username")
                     )
 
                     if result:
@@ -115,7 +116,8 @@ def main():
                     result=st.session_state.voice_pipeline.process_event(
                         event="workout_completed",
                         exercise=exercise,
-                        metrics={}
+                        metrics={},
+                        username=st.session_state.get("username")
                     )
                 st.rerun()
 

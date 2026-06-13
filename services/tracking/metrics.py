@@ -77,6 +77,7 @@ def sync_metrics_update(context):
                 event="workout_completed",
                 exercise=exercise,
                 metrics=latest_metrics,
+                  username=st.session_state.get("username") 
             )
                      
 
@@ -95,6 +96,7 @@ def sync_metrics_update(context):
                 event="workout_completed",
                 exercise=exercise,
                 metrics=latest_metrics,
+                  username=st.session_state.get("username") 
             )
             if result:
                 st.session_state.audio_to_play,st.session_state.coach_feedback=result
@@ -107,6 +109,7 @@ def sync_metrics_update(context):
             event="no_pose_detected",
             exercise=exercise,
             metrics={"issue":"No pose detected! Please step into the camera frame."},
+            username=st.session_state.get("username") 
 
         )
 
@@ -119,6 +122,7 @@ def sync_metrics_update(context):
             event="ongoing_form_check",
             exercise=exercise,
             metrics=latest_metrics,
+            username=st.session_state.get("username") 
         )
 
         if result:

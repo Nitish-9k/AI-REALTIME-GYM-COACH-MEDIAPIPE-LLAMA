@@ -67,7 +67,8 @@ class PushUpDetector(BaseExercise):
         expected_hip_y=(shoulder_y+ankle_y)/2
         hip_deviation=hip_y-expected_hip_y
 
-        key_landmarks_visible=landmarks[shoulder_idx].visibility>self.MIN_VISIBILITY
+        key_landmarks_visible=(landmarks[shoulder_idx].visibility>self.MIN_VISIBILITY
+                       and landmarks[elbow_idx].visibility>self.MIN_VISIBILITY)
 
         if key_landmarks_visible:
             if elbow_angle< self.DOWN_THRESHOLD:

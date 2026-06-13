@@ -9,11 +9,17 @@ class LLMCOACH:
 
 
 
-    def give_feedback(self,event,issue):
-        prompt= f"Event:{event}"
+    def give_feedback(self,event,issue,username=None):
+        print("llm username",repr(username))
+        prompt= f" Event:{event}"
+        if username:
+            prompt+=f" User:{username}"
+        
 
         if issue:
             prompt +=f" Form Issue: {issue}"
+
+
 
 
 
