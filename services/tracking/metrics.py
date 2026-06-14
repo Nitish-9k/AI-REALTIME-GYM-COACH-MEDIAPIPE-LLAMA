@@ -77,7 +77,7 @@ def sync_metrics_update(context):
                 event="workout_completed",
                 exercise=exercise,
                 metrics=latest_metrics,
-                  username=st.session_state.get("username") 
+                username=st.session_state.get("username") 
             )
                      
 

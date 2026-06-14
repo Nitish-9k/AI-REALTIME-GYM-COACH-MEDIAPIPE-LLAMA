@@ -1,37 +1,40 @@
 import os
 import streamlit as st
-import base64
 import streamlit.components.v1 as components
-
+import base64
+ 
 
 def load_css(file_path):
     if os.path.exists(file_path):
-        with open(file_path)as f:
-            st.markdown(f"<style>{f.read()}</style>",unsafe_allow_html=True)
+        with open(file_path) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-def inject_local_fonts(font_path,font_name):
+
+def inject_local_fonts(font_path, font_name):
     if not os.path.exists(font_path):
         return
     
-    with open(font_path,"rb") as f:
-        encoded=base64.base64encode(f.read()).decode()
-        ext=os.path.splitext(font_path)[1].lstrip(".")
-        fmt={"otf":"opentype","ttf":"truetype"}.get(ext,ext)
-        mime={"otf":"font/otf","ttf":"font/ttf"}.get(ext,f"font/{ext}")
+    with open(font_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
 
-        st.markdown(f""" 
-            <style>
-            @font-face{{
-            font-family:'{font_name}';
-            src: url('data:{mime};base64,{encoded}')format('{fmt}');
-            font-weight:100 900;
+    ext = os.path.splitext(font_path)[1].lstrip(".")
+    fmt = {"otf": "opentype"}.get(ext, ext)
+    mime = {"otf": "font/otf"}.get(ext, f"font/{ext}")
+
+    st.markdown(f"""
+        <style>
+        @font-face {{
+            font-family: '{font_name}';
+            src: url('data:{mime};base64,{encoded}') format('{fmt}');
+            font-weight: 100 900;
             font-style: normal;
-            }}
-            </style>
-             """,unsafe_allow_html=True)
-def inject_webrtc_styles():
-    font_path = os.path.join(os.getcwd(), "static", "AdobeClean.otf")
+        }}
+        </style>
+    """, unsafe_allow_html=True)
 
+def inject_webrtc_styles():
+    font_path = os.path.join(os.getcwd(), "static", "Gelasio-Bold.otf")
+    
     if not os.path.exists(font_path):
         return
 
@@ -51,7 +54,7 @@ def inject_webrtc_styles():
                     style.id = 'webrtc-custom-styles';
                     style.textContent = `
                         @font-face {{
-                            font-family: 'AdobeClean';
+                            font-family: 'Gelasio-Bold';
                             src: url('data:font/otf;base64,{encoded_font}') format('opentype');
                             font-weight: 100 900;
                             font-style: normal;
@@ -91,6 +94,3 @@ def inject_webrtc_styles():
         """,
         height=0,
     )
-
-
-

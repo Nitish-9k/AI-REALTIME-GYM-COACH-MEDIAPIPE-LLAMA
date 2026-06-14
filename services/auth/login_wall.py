@@ -11,7 +11,13 @@ def render_login_wall():
 
     with st.form("Login Form"):
         username=st.text_input("Username",placeholder="Enter your username")
-        submit_button = st.form_submit_button("Start Session",width="stretch")
+        # submit_button = st.form_submit_button("Start Session",width="stretch")
+        st.markdown('<div class="login-page">', unsafe_allow_html=True)
+
+        submit_button=st.form_submit_button("Start Session",width="stretch")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
     
 
     if submit_button:
