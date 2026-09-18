@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Real-time Gym Coach - Project Explanation</title>
+<style>
+@page { size: A4; margin: 18mm; }
+body { font-family: Arial, sans-serif; line-height: 1.5; color: #172033; max-width: 900px; margin: auto; }
+h1 { color: #0d47a1; font-size: 30px; border-bottom: 3px solid #0d47a1; padding-bottom: 8px; }
+h2 { color: #1565c0; margin-top: 28px; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; }
+h3 { color: #283593; margin-bottom: 4px; }
+code, pre { background: #f3f6fa; border-radius: 4px; }
+code { padding: 2px 4px; }
+pre { padding: 10px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.card { background: #f5f9ff; border-left: 4px solid #1976d2; padding: 10px 14px; margin: 12px 0; }
+.small { color: #546e7a; font-size: 0.9em; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+th, td { border: 1px solid #cfd8dc; padding: 7px; text-align: left; vertical-align: top; }
+th { background: #e3f2fd; }
+li { margin: 4px 0; }
+.pagebreak { page-break-before: always; }
+</style>
+</head>
+<body>
+<h1>AI Real-time Gym Coach — Interview Explanation</h1>
+<p class="small">Repository: Nitish-9k/AI-REALTIME-GYM-COACH-MEDIAPIPE-LLAMA</p>
+
+<h2>1. Project in one minute</h2>
+<p>This is a Streamlit web application that acts as a real-time personal gym coach. It receives webcam frames through WebRTC, uses OpenCV to prepare and draw on the frames, and uses MediaPipe Pose Landmarker to detect body landmarks. Exercise-specific detector classes calculate angles, count repetitions, and evaluate form for squats, push-ups, lunges, biceps curls, and shoulder presses. The metrics are shown in the UI and sent to LLaMA through Groq; gTTS converts the generated feedback into voice audio. Workout progress is saved in SQLite.</p>
+<div class="card"><b>Interview summary:</b> WebRTC transports video, OpenCV processes and annotates frames, MediaPipe detects landmarks, detector classes interpret movement, LLaMA generates coaching language, gTTS speaks it, and SQLite stores workout history.</div>
+
+<h2>2. Runtime flow</h2>
+<pre>Login with username
+  -> Select exercise, sets, and repetitions
+  -> Start WebRTC webcam stream
+  -> VideoProcessorClass.recv(frame)
+  -> OpenCV flip/color conversion
+  -> MediaPipe pose landmark detection
+  -> Selected exercise detector.process(landmarks)
+  -> Angles, form status, and repetition count
+  -> Streamlit session state and dashboard
+  -> LLaMA feedback -> gTTS audio -> browser playback
+  -> Completed sets stored in SQLite</pre>
+
+<h2>3. Classes created in the project</h2>
+
+<h3>3.1 <code>BaseExercise</code> — <code>core/base_exercise.py</code></h3>
+<p><b>Purpose:</b> Abstract base class for all exercise detectors. It centralizes shared geometry and defines the interface every exercise must follow.</p>
+<ul>
+<li><code>__init__()</code>: initializes <code>reps = 0</code> and <code>stage = None</code>.</li>
+<li><code>calculate_angle(a, b, c)</code>: calculates the angle at point <code>b</code> using two vectors, a dot product, vector magnitudes, and <code>acos</code>. It protects against zero-length vectors and clamps the cosine value between -1 and 1.</li>
+<li><code>get_points(landmarks, idx)</code>: converts a MediaPipe landmark into its normalized <code>(x, y)</code> coordinate pair.</li>
+<li><code>process(landmarks)</code>: abstract method. Each child detector implements exercise-specific analysis.</li>
+<li><code>reset()</code>: abstract method. Each child resets its repetition state.</li>
+</ul>
+<p><b>Design concept:</b> inheritance avoids duplicating angle logic while polymorphism allows the video processor to call the same <code>process()</code> method for different exercises.</p>
+
+<h3>3.2 <code>SquatsDetector</code> — <code>detectors/squats.py</code></h3>
+<p><b>Purpose:</b> Counts squats and evaluates knee angle, back angle, and squat depth.</p>
+<ul>
+<li>Calculates left and right hip-knee-ankle angles.</li>
+<li>Chooses the side with better knee landmark visibility.</li>
+<li>Uses knee angle below 100° as the down position and at least 160° as the up position.</li>
+<li>Counts one repetition only when the state changes from <code>down</code> to <code>up</code>.</li>
+<li>Calculates back angle using shoulder, hip, and knee.</li>
+<li>Returns <code>reps</code>, <code>knee_angle</code>, <code>back_angle</code>, and <code>depth_status</code>.</li>
+</ul>
+
+<h3>3.3 <code>PushUpDetector</code> — <code>detectors/pushups.py</code></h3>
+<p><b>Purpose:</b> Counts push-ups and checks body alignment and hip position.</p>
+<ul>
+<li>Selects the side with the more visible elbow.</li>
+<li>Calculates shoulder-elbow-wrist angle for arm movement.</li>
+<li>Uses elbow angle below 90° for down and above 160° for up.</li>
+<li>Calculates shoulder-hip-ankle body angle and classifies it as <code>STRAIGHT</code>, <code>SLIGHT BEND</code>, or <code>POOR FORM</code>.</li>
+<li>Compares actual hip height with the expected midpoint between shoulder and ankle to detect <code>LEVEL</code>, sagging, or raised hips.</li>
+</ul>
+
+<h3>3.4 <code>LungesDetector</code> — <code>detectors/lunges.py</code></h3>
+<p><b>Purpose:</b> Counts lunges and evaluates the front knee, torso angle, and balance.</p>
+<ul>
+<li>Calculates both knee angles and treats the smaller angle as the front knee.</li>
+<li>Uses below 100° as the down position and above 160° as the up position.</li>
+<li>Calculates torso angle using shoulder, hip, and knee.</li>
+<li>Measures the horizontal shoulder-to-hip offset to classify the user as <code>BALANCED</code> or <code>OFF BALANCE</code>.</li>
+</ul>
+
+<h3>3.5 <code>BicepsCurlDetector</code> — <code>detectors/biceps.py</code></h3>
+<p><b>Purpose:</b> Counts dumbbell curls and detects elbow drift and torso swinging.</p>
+<ul>
+<li>Selects the arm with greater elbow visibility.</li>
+<li>Uses elbow angle below 50° as the curled-up position and above 160° as the lowered position.</li>
+<li>Counts a repetition after an up-to-down transition.</li>
+<li>Compares elbow and shoulder x-coordinates to detect stable or drifting elbows.</li>
+<li>Calculates torso angle from shoulder and hip midpoints; an angle above the swing threshold indicates swinging.</li>
+<li><code>_safe_angle(dx, dy)</code> safely calculates torso angle with <code>atan2</code>.</li>
+</ul>
+
+<h3>3.6 <code>ShoulderPressDetector</code> — <code>detectors/shoulder_press.py</code></h3>
+<p><b>Purpose:</b> Counts shoulder presses and evaluates arm extension and back arch.</p>
+<ul>
+<li>Selects the arm with greater elbow visibility.</li>
+<li>Uses elbow angle above 160° as up/full extension and below 90° as down.</li>
+<li>Classifies extension as full, nearly extended, pressing, or start position.</li>
+<li>Calculates the shoulder-hip-knee back angle.</li>
+<li>Classifies back posture as neutral, slight arch, or excessive arch.</li>
+</ul>
+
+<h3>3.7 <code>VideoProcessorClass</code> — <code>services/vision/exercise_viseo_processor.py</code></h3>
+<p><b>Purpose:</b> Main real-time video-processing class. It connects WebRTC, OpenCV, MediaPipe, and the exercise detectors.</p>
+<ul>
+<li>Inherits from <code>VideoProcessorBase</code>, allowing <code>streamlit-webrtc</code> to call <code>recv()</code> for every frame.</li>
+<li><code>__init__()</code> loads <code>pose_landmarker_full.task</code>, configures MediaPipe video mode and confidence thresholds, and creates one detector object for each supported exercise.</li>
+<li><code>recv(frame)</code> converts the incoming frame to a NumPy array, flips it, changes BGR to RGB, runs MediaPipe, calls the selected detector, draws overlays, stores metrics, and returns an <code>av.VideoFrame</code>.</li>
+<li><code>_draw_skeleton()</code> draws visible landmarks and configured pose connections with OpenCV.</li>
+<li><code>_draw_no_pose_warnings()</code> displays a warning when no pose is found.</li>
+<li><code>_draw_overlays()</code> dispatches to exercise-specific overlay methods.</li>
+<li><code>set_latest_metrics()</code> and <code>get_latest_metrics()</code> safely share metrics between the video thread and Streamlit.</li>
+<li><code>set_exercise()</code> and <code>get_exercise()</code> safely manage the selected exercise.</li>
+</ul>
+<div class="card"><b>Concurrency:</b> The class uses <code>threading.Lock</code> because WebRTC processing and Streamlit UI updates can run in different execution contexts.</div>
+
+<h3>3.8 <code>LLMCOACH</code> — <code>services/coaching/LLM.py</code></h3>
+<p><b>Purpose:</b> Wraps the Groq client and turns workout events into short natural-language coaching responses.</p>
+<ul>
+<li><code>__init__(groq_client)</code> stores the client, prompt, and response history.</li>
+<li><code>give_feedback(event, issue, username)</code> builds a prompt containing the event, user name, and form issue.</li>
+<li>It sends a system prompt plus recent history to the <code>llama-3.3-70b-versatile</code> model with temperature 0.4.</li>
+<li>Returns the cleaned assistant response and keeps recent assistant responses for context.</li>
+</ul>
+
+<h3>3.9 <code>TextToSpeech</code> — <code>services/coaching/tts.py</code></h3>
+<p><b>Purpose:</b> Converts the LLM text into browser-playable MP3 bytes.</p>
+<ul>
+<li><code>speech(text, lang="en")</code> strips empty input, creates a <code>BytesIO</code> buffer, calls gTTS, and returns the audio bytes.</li>
+</ul>
+
+<h3>3.10 <code>voice_pipeline</code> — <code>services/coaching/voice_pipeline.py</code></h3>
+<p><b>Purpose:</b> Orchestrates issue detection, LLM feedback, text-to-speech, and audio timing.</p>
+<ul>
+<li><code>_find_form_issue(exercise, metrics)</code> translates structured detector metrics into a human-readable form issue.</li>
+<li><code>process_event(event, exercise, metrics, username)</code> handles major events immediately and rate-limits ongoing corrections to once every five seconds.</li>
+<li>It calls <code>LLMCOACH.give_feedback()</code>, then <code>TextToSpeech.speech()</code>, and returns audio plus text.</li>
+<li><code>autoplay_audio(audio_bytes)</code> hides the normal audio widget and asks Streamlit to autoplay the generated MP3.</li>
+</ul>
+<p class="small">The class name is lowercase in the current repository; Python convention would normally use <code>VoicePipeline</code>.</p>
+
+<h2>4. Important non-class modules</h2>
+<table>
+<tr><th>Module</th><th>Responsibility</th></tr>
+<tr><td><code>main.py</code></td><td>Application entry point, login, workout controls, WebRTC startup, metrics display, and history table.</td></tr>
+<tr><td><code>services/auth/login_wall.py</code></td><td>Username form and get-or-create user flow.</td></tr>
+<tr><td><code>services/tracking/metrics.py</code></td><td>Copies detector metrics into Streamlit state, calculates sets, saves completed sets, and triggers coaching events.</td></tr>
+<tr><td><code>services/persistence/exercise_repositry.py</code></td><td>SQLite connection, users table, exercises table, and CRUD-like functions.</td></tr>
+<tr><td><code>services/config/workout_config.py</code></td><td>Exercise names, MediaPipe connection pairs, default metric fields, and LLM system prompt.</td></tr>
+<tr><td><code>services/state/session_defualts.py</code></td><td>Initializes Streamlit session-state keys.</td></tr>
+<tr><td><code>services/ui/style_loader.py</code></td><td>Loads CSS and embeds local fonts into Streamlit and the WebRTC iframe.</td></tr>
+</table>
+
+<h2>5. Technologies</h2>
+<ul>
+<li><b>Streamlit:</b> Python-based UI and session state.</li>
+<li><b>WebRTC:</b> Real-time browser webcam transport.</li>
+<li><b>OpenCV:</b> frame conversion, flipping, drawing, and overlays.</li>
+<li><b>MediaPipe:</b> 33-point human pose landmark detection.</li>
+<li><b>Groq + LLaMA:</b> short contextual coaching language.</li>
+<li><b>gTTS:</b> text-to-speech audio generation.</li>
+<li><b>SQLite:</b> local user and workout persistence.</li>
+</ul>
+
+<h2>6. How to run</h2>
+<pre>git clone https://github.com/Nitish-9k/AI-REALTIME-GYM-COACH-MEDIAPIPE-LLAMA.git
+cd AI-REALTIME-GYM-COACH-MEDIAPIPE-LLAMA
+pip install -r requirements.txt
+export GROQ_API_KEY="your_groq_api_key_here"
+streamlit run main.py</pre>
+<p>Use a browser with webcam permission. Linux deployments may also need the packages in <code>packages.txt</code>.</p>
+
+<h2>7. Limitations and improvement points</h2>
+<ul>
+<li>Pose thresholds are fixed and may need calibration for different users, camera angles, and body proportions.</li>
+<li>Only the first detected pose is used.</li>
+<li>Ongoing feedback can generate frequent API/TTS calls; production code could batch or debounce events more aggressively.</li>
+<li>SQLite is suitable for a small deployment but a server database would be better for multiple users.</li>
+<li>The notebook in <code>JupyterNotebook/EDA&amp;DATAPREP.ipynb</code> analyzes resume/job data and is separate from the gym-coach runtime.</li>
+</ul>
+
+<h2>8. Final interview answer</h2>
+<p>“My project is a real-time AI gym coach. The browser sends webcam video through WebRTC. OpenCV prepares each frame, and MediaPipe detects body landmarks. I created a common <code>BaseExercise</code> class for angle calculation and then implemented separate detectors for squats, push-ups, lunges, biceps curls, and shoulder presses. Each detector uses visibility checks, joint-angle thresholds, and a down/up state machine to count valid repetitions and identify form problems. The metrics are displayed in Streamlit and passed to a voice pipeline. LLaMA through Groq converts the detected event into a concise coaching sentence, gTTS converts it to speech, and the audio plays in the browser. Completed workout sets are stored in SQLite and displayed as history.”</p>
+
+<p class="small">To create a PDF: open this HTML file in a browser, choose Print, select “Save as PDF,” and use A4 paper.</p>
+</body>
+</html>
